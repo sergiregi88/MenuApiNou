@@ -6,6 +6,7 @@ use App\Http\Controllers\User\Auth\AuthController;
 use App\Http\Controllers\User\Auth\NewPasswordController;
 use App\Http\Controllers\User\Auth\EmailVerificationController;
 use App\Http\Requests\EmailVerificationRequestApi;
+use App\Http\Controllers\User\UserDetailsAndStatsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,8 +41,10 @@ Route::prefix("v1")->group(function(){
         Route::group(['middleware'=>["auth:sanctum",]],function(){
             Route::post("verification-notification/{IsUnityReq}",[EmailVerificationController::class,'sendEmailVerification']);
           ///  Route::get('verify-email-login/{id},/{hash}', [EmailVerificationController::class, 'verifyUserLogin'])->name('verification.verify')->middleware('jsonMiddleware');
-            Route::post("register2",[AuthController::class,'register']);
+            //Route::post("register2",[AuthController::class,'register']);
             Route::post('resend-email-verification',[EmailVerificationController::class,'resendEmailVerification']);
+            Route::get('user-details-and-stats',[UserDetailsAndStatsController::class,'GetData']);
+
         });
     });
         

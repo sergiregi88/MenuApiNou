@@ -195,7 +195,13 @@ class ApiController extends Controller
                 'validation_errors' => $validator->errors()
             ]);
     }
-
+    protected function respondValidationErrorsStr($validator)
+    {
+        return $this->setStatusCode(IlluminateResponse::HTTP_UNPROCESSABLE_ENTITY)
+            ->respond([
+                'validation_errors' => $validator
+            ]);
+    }
 
     public function curlExec($url, $method = 'GET', $data = [])
     {

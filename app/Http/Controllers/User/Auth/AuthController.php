@@ -25,6 +25,10 @@ class AuthController extends ApiController
         if ($validator->fails()) {
             return $this->respondValidationErrors($validator);
         }
+        $var=explode("@", $request->email);
+        if(!checkdnsrr(array_pop($var),"MX")){
+            return $this->respondValidationErrorsStr(json_decode('{"email":["The email dns is not valid." ]}'));
+        }
         $user=User::create([
             "username"=>$request->username,
             "email"=>$request->email,
@@ -35,6 +39,8 @@ class AuthController extends ApiController
        
         event(new Registered($user));
         event(new Login($request->guard,$user,null));
+        $user->Details()->create();
+        $user->Stats()->create();
         $response=[
             "token"=>$token,
             "user"=>$user,
@@ -51,9 +57,9 @@ class AuthController extends ApiController
         if(!$user || !Hash::check($request->password,$user->password)){
             return  $this->respondUnauthorizedError("Bad Creedentials");
            }
-        if($user->email_verified_at==null){
-            return $this->respondUnauthorizedError("Need to verify account. Check email box!!");
-        }
+        //if($user->email_verified_at==null){
+         //   return $this->respondUnauthorizedError("Need to verify account. Check email box!!");
+        //}
        
         $token=$user->createToken("token")->plainTextToken;
 

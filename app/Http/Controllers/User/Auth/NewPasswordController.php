@@ -15,15 +15,16 @@ class NewPasswordController extends ApiController
 {
     public function forgotPassword(Request $request, $IsUsingUnity)
     {
+        
         $validator = Validator::make($request->all(), [
             "email" => "required|string|email"
         ]);
         if ($validator->fails()) {
             return $this->respondValidationErrors($validator);
         }
-        // si vull fer reset amb link de correu
 
         if ($IsUsingUnity == "0") {
+        
             $status = Password::sendResetLink($request->only("email"));
 
             if ($status == Password::INVALID_USER) {
@@ -44,6 +45,7 @@ class NewPasswordController extends ApiController
             $res = Password::sendResetLink($request->only("email"), function ($user, $token) use (&$data) {
                 $data['email'] = $user->email;
                 $data['token'] = $token;
+                $user->sendPasswordResetNotification($token);
                 return $data;
             });
            
@@ -56,8 +58,8 @@ class NewPasswordController extends ApiController
             }
 
             if ($res[0] == Password::RESET_LINK_SENT) {
-               
-                return $this->respondData($data);
+        
+                return $this->respondSuccessDataMessage($res[1]," Initinated Reset Paswsword");
             }
             
         } else {
@@ -100,9 +102,7 @@ class NewPasswordController extends ApiController
         return   $this->respondInternalError();
     }
     public function resetToken(Request $request,$token){
-        $this->token->where("token",$token);
-
-
-
+      
+        return view("reset-password");
     }
 }

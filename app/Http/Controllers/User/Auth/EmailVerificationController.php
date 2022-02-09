@@ -45,7 +45,7 @@ class EmailVerificationController extends ApiController
         if ($request->user()->hasVerifiedEmail()) {
             return $this->respondUnprocessableEntity("Email Already Verified");
         }
-        if ($IsUnityReq == "1") {
+        if ($IsUnityReq == "0") {
             //TODO somehow 
             $url= URL::temporarySignedRoute(
                 'verification.verifyUserLogin',
@@ -57,7 +57,7 @@ class EmailVerificationController extends ApiController
                 ]
             );
             return $this->respondSuccessDataMessage($url, "Email Verification Sended");
-        } else if ($IsUnityReq == "0") {
+        } else if ($IsUnityReq == "1") {
 
               $request->user()->sendEmailVerificationNotification();
 
