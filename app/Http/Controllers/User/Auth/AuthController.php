@@ -57,9 +57,7 @@ class AuthController extends ApiController
         if(!$user || !Hash::check($request->password,$user->password)){
             return  $this->respondUnauthorizedError("Bad Creedentials");
            }
-        //if($user->email_verified_at==null){
-         //   return $this->respondUnauthorizedError("Need to verify account. Check email box!!");
-        //}
+     
        
         $token=$user->createToken("token")->plainTextToken;
 

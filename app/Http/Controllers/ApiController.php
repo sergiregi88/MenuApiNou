@@ -136,7 +136,7 @@ class ApiController extends Controller
     public function respondWithError($message)
     {
         return $this->respond([
-                    
+            'status' => false,
                         'message' => $message,
                 
                 ]);
@@ -161,6 +161,7 @@ class ApiController extends Controller
 
         return $this->setStatusCode(IlluminateResponse::HTTP_UNPROCESSABLE_ENTITY)
             ->respond([
+                
                 'message' => $message
             ]);
     }

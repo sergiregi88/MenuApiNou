@@ -9,9 +9,12 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\SendEmailConfirmVerificationNotification;
+use App\Notifications\VerifyNewEmailNotification;
+use App\Traits\MustVerifyNewEmail;
+use Illuminate\Database\Eloquent\Model;
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable,MustVerifyNewEmail;
 
     
     /**
@@ -58,11 +61,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendConfirmVerificationEmail(){
         $this->notify(new SendEmailConfirmVerificationNotification($this));
     }
+    public function sendVerifyNewEmailNotification(Model $pendingUserEmail){
+        $this->notify(new VerifyNewEmailNotification($pendingUserEmail));
+    }
 
     public function Details(){
      return   $this->hasOne(UserDetails::class);
     }
     public function Stats(){
         return   $this->hasOne(UserStats::class);
+    }
+    public function markNewEmailAsVerified()
+    {
+        return $this->forceFill([
+            'new_email_verified_at' => $this->freshTimestamp(),
+        ])->save();
     }
 }

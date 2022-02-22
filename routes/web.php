@@ -18,6 +18,8 @@ Route::get('/', function () {
 });
 
 Route::get("reset-password",[NewPasswordController::class,'resetGet']);
-
+Route::get("verifyNewEmailCorrect",function(){
+    
+});
 
 //Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verifyUserWeb'])->name('verification.verifyweb');
