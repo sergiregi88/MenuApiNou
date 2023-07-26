@@ -124,6 +124,7 @@ class UserDetailsAndStatsController extends ApiController
             return $this->respondValidationErrors($validator);
         }
         auth()->user()->password=bcrypt($request->password);
-        return $this->respondSuccessMessage("password Updated ok");
+        auth()->user()->save();
+        return $this->respondSuccessMessage(" Password sucessfuly updated. ");
     }
 }

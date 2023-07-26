@@ -7,6 +7,10 @@ use App\Http\Controllers\User\Auth\NewPasswordController;
 use App\Http\Controllers\User\Auth\EmailVerificationController;
 use App\Http\Controllers\User\UserDetailsAndStatsController;
 use App\Http\Controllers\User\Auth\VerifyNewEmailController;
+use App\Http\Controllers\NoUser\GameSlotResumeController;
+use App\Http\Controllers\NoUser\GameDataController;
+use App\Http\Controllers\NoUser\GameSlotController;
+use App\Models\GameSlot\GameSlotResumeData;
 use Illuminate\Support\Facades\Config;
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +31,15 @@ Route::prefix("v1")->group(function(){
         return Config::get('auth.verification.expire',99);
     });
     Route::prefix("nouser")->group(function(){
-    
+
+        Route::get("gameData",[GameDataController::class,"CreateGetUniqueGameData"]);
+        Route::put("gameData",[GameDataController::class,"UpdateUniqueGameData"]);
+        //Route::get("getGameDataSlotsResume",[GameDataController::class,'GetGameDataSlotsResume']);
+        Route::get("gameSlotData/{id}",[GameSlotController::class,'GetGameSlotData']);
+        Route::put("gameSlotData/{id}",[GameSlotController::class,'PutGameSlotData']);
+
+        Route::post("GameSlotResume",[GameSlotResumeController::class,"CreateGameSlotResume"]);
+        Route::get("GameSlotResume",[GameSlotResumeController::class,"GetAllGameSlotsResumes"]);
     });
   
     Route::prefix("user")->group(function(){
@@ -36,7 +48,7 @@ Route::prefix("v1")->group(function(){
         Route::post("forgot-password/{IsUsingUnity}",[NewPasswordController::class,'forgotPassword']);
         Route::post("reset-password",[NewPasswordController::class,'reset']);
         Route::get("reset-password/{token}",[NewPasswordController::class,'resetToken']);
-        
+        Route::post("logout",[AuthController::class,'logout']);
         Route::get('verify-email-login/{id}/{hash}', [EmailVerificationController::class, 'verifyUserLogin'])->name('verification.verify')->middleware("signed");
         Route::get('verify-email-login/{id}/{hash}/{unityReq}', [EmailVerificationController::class, 'verifyUserLogin'])->name('verification.verifyUserLogin')->middleware("signed");
         Route::get('pendingEmail/verify/{token}', [VerifyNewEmailController::class, 'verify'])->name('pendingEmail.verify');

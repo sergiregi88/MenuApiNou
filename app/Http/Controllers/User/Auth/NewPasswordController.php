@@ -19,16 +19,18 @@ class NewPasswordController extends ApiController
         $validator = Validator::make($request->all(), [
             "email" => "required|string|email"
         ]);
+        
         if ($validator->fails()) {
+            
             return $this->respondValidationErrors($validator);
         }
-
+        
         if ($IsUsingUnity == "0") {
         
             $status = Password::sendResetLink($request->only("email"));
 
             if ($status == Password::INVALID_USER) {
-                return $this->respondUnprocessableEntity(" inavlid user ");
+                return $this->respondUnprocessableEntity("We not have this email registered.");
             }
 
             if ($status == Password::RESET_THROTTLED) {
@@ -38,28 +40,30 @@ class NewPasswordController extends ApiController
             if ($status == Password::RESET_LINK_SENT) {
                 return $this->respondSuccessMessage($status);
             }
+            
             // si jo faig mes endavnt un client web amb login i registtre i tot 
             // si vull fer reset sende enviar correu 
         } else if ($IsUsingUnity == "1") {
+        
             $data=null;
-            $res = Password::sendResetLink($request->only("email"), function ($user, $token) use (&$data) {
+            $res = Password::sendResetLink($request->only("email"), function ($user, $token) use (& $data) {
                 $data['email'] = $user->email;
                 $data['token'] = $token;
                 $user->sendPasswordResetNotification($token);
                 return $data;
             });
-           
-            if ($res[0] == Password::INVALID_USER) {
-                return $this->respondUnprocessableEntity(" inavlid user ");
-            }
-
-            if ($res[0] == Password::RESET_THROTTLED) {
-                return  $this->respondUnprocessableEntity(" throttled reset");
-            }
-
-            if ($res[0] == Password::RESET_LINK_SENT) {
         
-                return $this->respondSuccessDataMessage($res[1]," Initinated Reset Paswsword");
+            if ($res == Password::INVALID_USER) {
+                return $this->respondUnprocessableEntity("We not have this email registered.");
+            }
+
+            if ($res== Password::RESET_THROTTLED) {
+                return  $this->respondUnprocessableEntity("Too much requests wait a minute...");
+            }
+
+            if (is_array($res)) {
+    
+                return $this->respondSuccessDataMessage($res," Initinated Reset Paswsword");
             }
             
         } else {
@@ -88,14 +92,14 @@ class NewPasswordController extends ApiController
             }
         );
         if ($status == Password::PASSWORD_RESET) {
-            return $this->respondSuccessMessage($status);
+            return $this->respondSuccessMessage("Password chaged correctly");
         }
         if ($status == Password::INVALID_USER) {
-            return $this->respondUnprocessableEntity(" inavlid user ");
+            return $this->respondUnprocessableEntity("We don't have this user registered.");
         }
         if ($status == Password::INVALID_TOKEN) {
 
-            return  $this->respondUnprocessableEntity(" inavlid token ");
+            return  $this->respondUnprocessableEntity("This token is not valid.");
         }
 
 
@@ -103,6 +107,6 @@ class NewPasswordController extends ApiController
     }
     public function resetToken(Request $request,$token){
       
-        return view("reset-password");
+        return view("reset-password",["token"=>$token,]);
     }
 }

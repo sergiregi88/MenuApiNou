@@ -141,6 +141,9 @@ class ApiController extends Controller
                 
                 ]);
     }
+    public function respondMessage($message){
+        return $this->respond( $message);
+    }
     /**
      * @param $message
      * @return mixed
@@ -200,7 +203,7 @@ class ApiController extends Controller
     {
         return $this->setStatusCode(IlluminateResponse::HTTP_UNPROCESSABLE_ENTITY)
             ->respond([
-                'validation_errors' => $validator
+                'validation_errors' => $validator->errors
             ]);
     }
 

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\User\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Login;
@@ -27,7 +27,8 @@ class AuthController extends ApiController
         }
         $var=explode("@", $request->email);
         if(!checkdnsrr(array_pop($var),"MX")){
-            return $this->respondValidationErrorsStr(json_decode('{"email":["The email dns is not valid." ]}'));
+            
+           return $this->respondValidationErrorsStr(json_decode('{"email":["The email dns is not valid." ]}'));
         }
         $user=User::create([
             "username"=>$request->username,
@@ -46,6 +47,7 @@ class AuthController extends ApiController
             "user"=>$user,
             'verifyUrl'=>VerifyEmail::$urlToSend,
         ];
+        dd("sss");
         return $this->respondSuccessDataMessage($response,"User Registered Correcly");
     }
     public function login(Request $request){
@@ -67,5 +69,9 @@ class AuthController extends ApiController
         ];
         event(new Login($request->guard,$user,null));
         return $this->respondSuccessDataMessage($response);
+    }
+    public function logout(Request $request){
+        $request->user()->currentAccessToken()->delete();
+        $this->respondSuccessMessage("Logout Success");
     }
 }
