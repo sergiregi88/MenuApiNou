@@ -24,7 +24,7 @@ return [
     /**
      * Model class that will be used to store and retrieve the tokens.
      */
-    'model' => \App\Models\PendingUserEmail::class,
+    'model' => \App\Models\Users\PendingUserEmail::class,
 
     /**
      * The Mailable that will be sent when the User wants to verify

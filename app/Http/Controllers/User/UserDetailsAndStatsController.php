@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\User;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
-use App\Models\UserDetails;
-use App\Models\UserStats;
+use App\Models\Users\UserDetails;
+use App\Models\Users\UserStats;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 class UserDetailsAndStatsController extends ApiController

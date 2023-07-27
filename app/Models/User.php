@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Users;
+namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -76,5 +76,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->forceFill([
             'new_email_verified_at' => $this->freshTimestamp(),
         ])->save();
+    }
+    public function getEmailForVerification2()
+    {
+        return $this->getEmailForVerification();
     }
 }

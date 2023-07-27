@@ -24,15 +24,15 @@ use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
  */
 class LoggerDataCollector extends DataCollector implements LateDataCollectorInterface
 {
-    private $logger;
-    private $containerPathPrefix;
-    private $currentRequest;
-    private $requestStack;
-    private $processedLogs;
+    private DebugLoggerInterface $logger;
+    private ?string $containerPathPrefix;
+    private ?Request $currentRequest = null;
+    private ?RequestStack $requestStack;
+    private ?array $processedLogs = null;
 
     public function __construct(object $logger = null, string $containerPathPrefix = null, RequestStack $requestStack = null)
     {
-        if (null !== $logger && $logger instanceof DebugLoggerInterface) {
+        if ($logger instanceof DebugLoggerInterface) {
             $this->logger = $logger;
         }
 
@@ -40,31 +40,22 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         $this->requestStack = $requestStack;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function collect(Request $request, Response $response, \Throwable $exception = null)
+    public function collect(Request $request, Response $response, \Throwable $exception = null): void
     {
         $this->currentRequest = $this->requestStack && $this->requestStack->getMainRequest() !== $request ? $request : null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function reset()
+    public function reset(): void
     {
-        if ($this->logger instanceof DebugLoggerInterface) {
+        if (isset($this->logger)) {
             $this->logger->clear();
         }
         $this->data = [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function lateCollect()
+    public function lateCollect(): void
     {
-        if (null !== $this->logger) {
+        if (isset($this->logger)) {
             $containerDeprecationLogs = $this->getContainerDeprecationLogs();
             $this->data = $this->computeErrorsCount($containerDeprecationLogs);
             // get compiler logs later (only when they are needed) to improve performance
@@ -108,7 +99,7 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
 
             $logs[] = [
                 'type' => $logType,
-                'errorCounter' => isset($rawLogData['errorCounter']) ? $rawLogData['errorCounter']->getValue() : 1,
+                'errorCount' => $rawLog['errorCount'] ?? 1,
                 'timestamp' => $rawLogData['timestamp_rfc3339']->getValue(),
                 'priority' => $rawLogData['priority']->getValue(),
                 'priorityName' => $rawLogData['priorityName']->getValue(),
@@ -119,9 +110,7 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         }
 
         // sort logs from oldest to newest
-        usort($logs, static function ($logA, $logB) {
-            return $logA['timestamp'] <=> $logB['timestamp'];
-        });
+        usort($logs, static fn ($logA, $logB) => $logA['timestamp'] <=> $logB['timestamp']);
 
         return $this->processedLogs = $logs;
     }
@@ -133,6 +122,7 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
             'priority' => [
                 'Debug' => 100,
                 'Info' => 200,
+                'Notice' => 250,
                 'Warning' => 300,
                 'Error' => 400,
                 'Critical' => 500,
@@ -143,7 +133,7 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
 
         $allChannels = [];
         foreach ($this->getProcessedLogs() as $log) {
-            if ('' === trim($log['channel'])) {
+            if ('' === trim($log['channel'] ?? '')) {
                 continue;
             }
 
@@ -186,9 +176,6 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         return $this->cloneVar($this->getContainerCompilerLogs($this->data['compiler_logs_filepath'] ?? null));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName(): string
     {
         return 'logger';
@@ -240,7 +227,7 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         return $logs;
     }
 
-    private function sanitizeLogs(array $logs)
+    private function sanitizeLogs(array $logs): array
     {
         $sanitizedLogs = [];
         $silencedLogs = [];
@@ -272,7 +259,7 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
                 continue;
             }
 
-            $errorId = md5("{$exception->getSeverity()}/{$exception->getLine()}/{$exception->getFile()}\0{$message}", true);
+            $errorId = hash('xxh128', "{$exception->getSeverity()}/{$exception->getLine()}/{$exception->getFile()}\0{$message}", true);
 
             if (isset($sanitizedLogs[$errorId])) {
                 ++$sanitizedLogs[$errorId]['errorCount'];

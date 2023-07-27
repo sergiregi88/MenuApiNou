@@ -15,7 +15,6 @@ class EmailVerificationRequestApi extends  BaseEmailVerificationRequest
      */
     public function authorize()
     {
-        //    dd("ss");
         $user = User::query()->findOrFail($this->route('id'));
 
         if (! hash_equals((string) $this->route('hash'),

@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\URL;
 
 class VerifyEmail extends Notification
 {
-    public static $urlToSend;
     /**
      * The callback that should be used to create the verify email URL.
      *
@@ -46,12 +45,10 @@ class VerifyEmail extends Notification
     public function toMail($notifiable)
     {
         $verificationUrl = $this->verificationUrl($notifiable);
-        static::$urlToSend=$verificationUrl;
-        
+            
         if (static::$toMailCallback) {
             return call_user_func(static::$toMailCallback, $notifiable, $verificationUrl);
         }
-        
 
         return $this->buildMailMessage($verificationUrl);
     }

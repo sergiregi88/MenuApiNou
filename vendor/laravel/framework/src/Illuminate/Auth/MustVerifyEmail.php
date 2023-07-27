@@ -35,7 +35,7 @@ trait MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new VerifyEmail());
+        $this->notify(new VerifyEmail);
     }
 
     /**

@@ -203,7 +203,7 @@ class ApiController extends Controller
     {
         return $this->setStatusCode(IlluminateResponse::HTTP_UNPROCESSABLE_ENTITY)
             ->respond([
-                'validation_errors' => $validator->errors
+                'validation_errors' => $validator->email
             ]);
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Users;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Traits\Tappable;
+
 
 class PendingUserEmail extends Model
 {

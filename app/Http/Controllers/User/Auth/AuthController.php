@@ -5,13 +5,17 @@ namespace App\Http\Controllers\User\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
-use App\Models\Users\User;
+use App\Models\User;
+use App\Notifications\VerifyEmailCustom;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Notifications\VerifyEmail;
 
+use Egulias\EmailValidator\EmailValidator;
+use Egulias\EmailValidator\Validation\DNSCheckValidation;
+use Egulias\EmailValidator\Validation\MultipleValidationWithAnd;
+use Egulias\EmailValidator\Validation\RFCValidation;
 class AuthController extends ApiController
 {
     public function register(Request $request){
@@ -25,11 +29,15 @@ class AuthController extends ApiController
         if ($validator->fails()) {
             return $this->respondValidationErrors($validator);
         }
-        $var=explode("@", $request->email);
-        if(!checkdnsrr(array_pop($var),"MX")){
-            
-           return $this->respondValidationErrorsStr(json_decode('{"email":["The email dns is not valid." ]}'));
-        }
+        $validator = new EmailValidator();
+$multipleValidations = new MultipleValidationWithAnd([
+    new RFCValidation(),
+    new DNSCheckValidation()
+]);
+//ietf.org has MX records signaling a server with email capabilities
+    if(!$validator->isValid($request->email, $multipleValidations)) //true
+        return $this->respondValidationErrorsStr(json_decode('{"email":["The email dns is not valid." ]}'));
+        
         $user=User::create([
             "username"=>$request->username,
             "email"=>$request->email,
@@ -42,12 +50,12 @@ class AuthController extends ApiController
         event(new Login($request->guard,$user,null));
         $user->Details()->create();
         $user->Stats()->create();
+    
         $response=[
             "token"=>$token,
             "user"=>$user,
-            'verifyUrl'=>VerifyEmail::$urlToSend,
+            'verifyUrl'=>VerifyEmailCustom::$verificationUrl,
         ];
-        dd("sss");
         return $this->respondSuccessDataMessage($response,"User Registered Correcly");
     }
     public function login(Request $request){
