@@ -73,10 +73,10 @@ $multipleValidations = new MultipleValidationWithAnd([
 
         $response=[
             "token"=>$token,
-            "user"=>$user,
+            "user"=>$user
         ];
         event(new Login($request->guard,$user,null));
-        return $this->respondSuccessDataMessage($response);
+        return $this->respondSuccessDataMessage($response,"Login Successfull");
     }
     public function logout(Request $request){
         $request->user()->currentAccessToken()->delete();

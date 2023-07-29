@@ -12,6 +12,8 @@ use App\Notifications\SendEmailConfirmVerificationNotification;
 use App\Notifications\VerifyNewEmailNotification;
 use App\Traits\MustVerifyNewEmail;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Users\UserDetails;
+use App\Models\Users\UserStats;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable,MustVerifyNewEmail;

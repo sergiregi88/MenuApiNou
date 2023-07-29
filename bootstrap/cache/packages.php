@@ -1,9 +1,9 @@
 <?php return array (
-  'fruitcake/laravel-cors' => 
+  'laravel/passport' => 
   array (
     'providers' => 
     array (
-      0 => 'Fruitcake\\Cors\\CorsServiceProvider',
+      0 => 'Laravel\\Passport\\PassportServiceProvider',
     ),
   ),
   'laravel/sail' => 
